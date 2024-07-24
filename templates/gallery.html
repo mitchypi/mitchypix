@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Gallery</title>
+</head>
+<body>
+    <h1>Image Gallery</h1>
+    {% if images %}
+        {% for image_path, caption in images %}
+        <div class="image-container">
+            <img src="{{ url_for('static', filename=image_path) }}" alt="Uploaded image" width="200">
+            <p class="caption">{{ caption }}</p>
+        </div>
+        {% endfor %}
+    {% else %}
+        <p>No images uploaded yet.</p>
+    {% endif %}
+    <p><a href="/">Back to Home</a></p>
+</body>
+</html>

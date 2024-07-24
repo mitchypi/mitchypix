@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Results</title>
+</head>
+<body>
+    <h1>Search Results for "{{ query }}"</h1>
+    {% if results %}
+        {% for path, caption, similarity in results %}
+        <div class="result">
+            <img src="{{ url_for('static', filename=path) }}" alt="Search result" width="200">
+            <p class="caption">{{ caption }}</p>
+            <p>Similarity: {{ "%.2f"|format(similarity) }}</p>
+        </div>
+        {% endfor %}
+    {% else %}
+        <p>No results found for "{{ query }}".</p>
+    {% endif %}
+    <p><a href="/">Back to Home</a></p>
+</body>
+</html>
