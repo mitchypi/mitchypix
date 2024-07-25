@@ -9,7 +9,7 @@ import time
 app = Flask(__name__)
 app.secret_key = 'hi'
 
-ITEMS_PER_PAGE = 20
+ITEMS_PER_PAGE = 50
 # Check for GPU
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(f"Using device: {device}")
@@ -119,10 +119,27 @@ def search():
     results = [(image_paths[i], image_captions[i], similarities[i].item()) for i in top_k_indices]
     
     return render_template('results.html', results=results, query=query)
+
 @app.route('/gallery')
 def gallery():
-    images_with_captions = list(zip(image_paths, image_captions))
-    return render_template('gallery.html', images=images_with_captions)
+    page = request.args.get('page', 1, type=int)
+    start = (page - 1) * ITEMS_PER_PAGE
+    end = start + ITEMS_PER_PAGE
+    
+    total_images = len(image_paths)
+    images_with_captions = list(zip(image_paths[start:end], image_captions[start:end]))
+    
+    total_pages = (total_images + ITEMS_PER_PAGE - 1) // ITEMS_PER_PAGE
+    
+    # Calculate the range of pages to display
+    page_range = range(max(1, page-2), min(total_pages, page+2) + 1)
+    
+    return render_template('gallery.html', 
+                           images=images_with_captions, 
+                           page=page, 
+                           total_pages=total_pages,
+                           total_images=total_images,
+                           page_range=page_range)
 
 def allowed_file(filename):
     ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
@@ -137,4 +154,4 @@ def generate_caption(image_path):
     return caption
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+    app.run(host='0.0.0.0', port=8080)

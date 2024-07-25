@@ -4,16 +4,60 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Image Gallery</title>
+    <style>
+        .image-container {
+            display: inline-block;
+            margin: 10px;
+            text-align: center;
+        }
+        .caption {
+            max-width: 200px;
+            word-wrap: break-word;
+        }
+        .pagination {
+            margin-top: 20px;
+            text-align: center;
+        }
+        .pagination a, .pagination span {
+            padding: 5px 10px;
+            margin: 0 5px;
+            border: 1px solid #ddd;
+            text-decoration: none;
+        }
+        .pagination .current {
+            background-color: #007bff;
+            color: white;
+        }
+    </style>
 </head>
 <body>
     <h1>Image Gallery</h1>
+    <p>Total Images: {{ total_images }}</p>
     {% if images %}
         {% for image_path, caption in images %}
         <div class="image-container">
-            <img src="{{ url_for('static', filename=image_path) }}" alt="Uploaded image" width="500">
+            <img src="{{ url_for('static', filename=image_path) }}" alt="Uploaded image" width="400">
             <p class="caption">{{ caption }}</p>
         </div>
         {% endfor %}
+        
+        <div class="pagination">
+            {% if page > 1 %}
+                <a href="{{ url_for('gallery', page=page-1) }}">&laquo; Previous</a>
+            {% endif %}
+            
+            {% for p in page_range %}
+                {% if p == page %}
+                    <span class="current">{{ p }}</span>
+                {% else %}
+                    <a href="{{ url_for('gallery', page=p) }}">{{ p }}</a>
+                {% endif %}
+            {% endfor %}
+            
+            {% if page < total_pages %}
+                <a href="{{ url_for('gallery', page=page+1) }}">Next &raquo;</a>
+            {% endif %}
+        </div>
     {% else %}
         <p>No images uploaded yet.</p>
     {% endif %}
