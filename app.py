@@ -105,7 +105,10 @@ def allowed_file(filename):
 @app.route('/search', methods=['POST'])
 def search():
     query = request.form['query']
-    top_k = int(request.form.get('top_k', 5)) 
+    try:
+        top_k = int(request.form.get('top_k', 5)) 
+    except ValueError:
+        top_k = 5
     
     inputs = clip_processor(text=[query], return_tensors="pt", padding=True).to(device)
     with torch.no_grad():
