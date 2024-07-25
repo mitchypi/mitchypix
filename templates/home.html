@@ -22,6 +22,52 @@
     </form>
     
     <p><a href="/gallery">View Image Gallery</a></p>
+
+    <img src="{{ url_for('static', filename='images/img1.png') }}">
+            <p>Movies I like:</p>
+            <ul>
+                <li>Yi Yi</li>
+                <li>Robot Dreams</li>
+                <li>Nebraska</li>
+                <li>Blade Runner 2049</li>
+                <li>Donnie Darko</li>
+                <li>Everything Everywhere all at once</li>
+                <li>Apocalypse Now</li>
+                <li>Stalingrad</li>
+                <li>Leviathan</li>
+                <li>Full Metal Jacket</li>
+            </ul>
+            <p>Games I like:</p>
+            <ul>
+                <li>Halo Reach</li>
+                <li>Life is Strange</li>
+                <li>Deus Ex</li>
+                <li>SOMA</li>
+                <li>jstris</li>
+                <li>Spec Ops the Line</li>
+                <li>Knights of the Old Republic</li>
+                <li>Fallout New Vegas</li>
+            </ul>
+            <p>Music I like:</p>
+            <ul>
+                <li>Jadu Heart</li>
+                <li>Superheaven</li>
+                <li>Deftones</li>
+                <li>Brian Jonestown Massacre</li>
+                <li>Yung Hurn</li>
+                <li>Split Chain</li>
+                <li>Valium Aggelein (Duster)</li>
+                <li>Santigold</li>
+                <li>Scarlet House</li>
+                <li>The Black Angels</li>
+                <li>go to my last.fm at https://www.last.fm/user/pimpledkey2200</li>
+            </ul>
+            <p>Books:</p>
+            <ul>
+                <li>All Max Frisch books</li>
+                <li>Dispatches</li>
+                <li>/u/befriendjamin reddit comments</li>
+            </ul>
 </body>
 {% with messages = get_flashed_messages() %}
   {% if messages %}
