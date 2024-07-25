@@ -8,6 +8,8 @@ import time
 
 app = Flask(__name__)
 app.secret_key = 'hi'
+
+ITEMS_PER_PAGE = 20
 # Check for GPU
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(f"Using device: {device}")
@@ -55,16 +57,13 @@ def upload():
             file.save(file_path)
             file_path = file_path.replace('\\', '/')
             
-            # Start timing the entire process
             total_start_time = time.time()
             
-            # Start timing the captioning process
             caption_start_time = time.time()
             caption = generate_caption(file_path)
             caption_end_time = time.time()
             caption_time = caption_end_time - caption_start_time
             
-            # Start timing the embedding creation process
             embedding_start_time = time.time()
             image = Image.open(file_path)
             inputs = clip_processor(images=image, return_tensors="pt").to(device)
@@ -73,7 +72,6 @@ def upload():
             embedding_end_time = time.time()
             embedding_time = embedding_end_time - embedding_start_time
             
-            # End timing the entire process
             total_end_time = time.time()
             total_time = total_end_time - total_start_time
             
@@ -86,7 +84,6 @@ def upload():
             print(f"Captioning time ratio: {caption_ratio:.2f}")
             print(f"Embedding time ratio: {embedding_ratio:.2f}")
             
-            # Add to arrays
             new_embedding = image_features.cpu().numpy()
             if embeddings.size == 0:
                 embeddings = new_embedding
@@ -95,7 +92,6 @@ def upload():
             image_paths = np.append(image_paths, os.path.join('uploads', filename).replace('\\', '/'))
             image_captions = np.append(image_captions, caption)
     
-    # Save to files
     np.save(EMBEDDINGS_FILE, embeddings)
     np.save(PATHS_FILE, image_paths)
     np.save(CAPTIONS_FILE, image_captions)
@@ -111,16 +107,13 @@ def search():
     query = request.form['query']
     top_k = int(request.form.get('top_k', 5)) 
     
-    # Encode query
     inputs = clip_processor(text=[query], return_tensors="pt", padding=True).to(device)
     with torch.no_grad():
         text_features = clip_model.get_text_features(**inputs)
     
-    # Search database
     embeddings_tensor = torch.from_numpy(embeddings).to(device)
     similarities = torch.cosine_similarity(text_features, embeddings_tensor, dim=1)
     
-    # Sort results by similarity
     sorted_indices = similarities.cpu().argsort(descending=True)
     top_k_indices = sorted_indices[:top_k]
     results = [(image_paths[i], image_captions[i], similarities[i].item()) for i in top_k_indices]

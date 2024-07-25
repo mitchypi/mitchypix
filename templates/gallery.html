@@ -10,7 +10,7 @@
     {% if images %}
         {% for image_path, caption in images %}
         <div class="image-container">
-            <img src="{{ url_for('static', filename=image_path) }}" alt="Uploaded image" width="200">
+            <img src="{{ url_for('static', filename=image_path) }}" alt="Uploaded image" width="500">
             <p class="caption">{{ caption }}</p>
         </div>
         {% endfor %}
