@@ -10,7 +10,7 @@
     {% if results %}
         {% for path, caption, similarity in results %}
         <div class="result">
-            <img src="{{ url_for('static', filename=path) }}" alt="Search result" width="200">
+            <img src="{{ url_for('static', filename=path) }}" alt="Search result" width="400">
             <p class="caption">{{ caption }}</p>
             <p>Similarity: {{ "%.2f"|format(similarity) }}</p>
         </div>
