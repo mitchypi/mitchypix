@@ -126,11 +126,17 @@ def search():
 @app.route('/gallery')
 def gallery():
     page = request.args.get('page', 1, type=int)
+    
+    total_images = len(image_paths)
+    
+    # Reverse the lists
+    reversed_image_paths = list(reversed(image_paths))
+    reversed_image_captions = list(reversed(image_captions))
+    
     start = (page - 1) * ITEMS_PER_PAGE
     end = start + ITEMS_PER_PAGE
     
-    total_images = len(image_paths)
-    images_with_captions = list(zip(image_paths[start:end], image_captions[start:end]))
+    images_with_captions = list(zip(reversed_image_paths[start:end], reversed_image_captions[start:end]))
     
     total_pages = (total_images + ITEMS_PER_PAGE - 1) // ITEMS_PER_PAGE
     
