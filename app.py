@@ -5,6 +5,7 @@ from transformers import CLIPProcessor, CLIPModel, BlipProcessor, BlipForConditi
 from PIL import Image
 import numpy as np
 import time
+from tqdm import tqdm
 
 app = Flask(__name__)
 app.secret_key = 'hi'
@@ -50,10 +51,15 @@ def upload():
     if not files or files[0].filename == '':
         return 'No selected file'
     
-    for file in files:
+    for file in tqdm(files, desc="Uploading images"):
         if file and allowed_file(file.filename):
             filename = file.filename
             file_path = os.path.join('static', 'uploads', filename)
+            relative_path = os.path.join('uploads', filename).replace('\\', '/')
+
+            if os.path.exists(file_path) or relative_path in image_paths:
+                print(f"Skipping existing image: {filename}")
+                continue
             file.save(file_path)
             file_path = file_path.replace('\\', '/')
             
@@ -89,7 +95,7 @@ def upload():
                 embeddings = new_embedding
             else:
                 embeddings = np.vstack((embeddings, new_embedding))
-            image_paths = np.append(image_paths, os.path.join('uploads', filename).replace('\\', '/'))
+            image_paths = np.append(image_paths, relative_path)
             image_captions = np.append(image_captions, caption)
     
     np.save(EMBEDDINGS_FILE, embeddings)
