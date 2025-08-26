@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About</title>
+    <style>
+        body {
+            font-size: 100%;
+            background-color: beige;
+            font-family: monospace;
+            text-align: center;
+        }
+        html {
+            -webkit-text-size-adjust: 100%;
+        }
+        table, td, tr{
+            border: 1px solid black;
+            border-collapse: collapse;
+            font-family: monospace;
+            text-align: center;
+        }
+        .wn{
+            text-align: left;
+        }
+        a { 
+            text-decoration: none;
+            text-align: center;
+        }
+        .button {
+            font-family: monospace;
+            padding: 8px 16px;
+            border: 1px solid black;
+            background-color: white;
+            cursor: pointer;
+            display: inline-block;
+            margin: 5px;
+        }
+        .button:hover {
+            background-color: #f0f0f0;
+        }
+        ul {
+            display: block;
+            text-align: left;
+            margin: 10px auto;
+            max-width: 400px;
+        }
+    </style>
+</head>
+<body>
+    <h1>About</h1>
+    
+    <p><a href="/" class="button">Back to Home</a></p>
+    
+    <p>Movies I like:</p>
+    <ul>
+        <li>Yi Yi</li>
+        <li>Robot Dreams</li>
+        <li>Nebraska</li>
+        <li>Blade Runner 2049</li>
+        <li>Donnie Darko</li>
+        <li>Everything Everywhere all at once</li>
+        <li>Apocalypse Now</li>
+        <li>Stalingrad</li>
+        <li>Leviathan</li>
+        <li>Full Metal Jacket</li>
+        <li>City of God</li>
+    </ul>
+    
+    <p>Games I like:</p>
+    <ul>
+        <li>Halo Reach</li>
+        <li>Life is Strange</li>
+        <li>Deus Ex</li>
+        <li>SOMA</li>
+        <li>jstris</li>
+        <li>Spec Ops the Line</li>
+        <li>Knights of the Old Republic</li>
+        <li>Fallout New Vegas</li>
+    </ul>
+    
+    <p>Music I like:</p>
+    <ul>
+        <li>Jadu Heart</li>
+        <li>Superheaven</li>
+        <li>Slow Pulp</li>
+        <li>Deftones</li>
+        <li>Brian Jonestown Massacre</li>
+        <li>Yung Hurn</li>
+        <li>Split Chain</li>
+        <li>Valium Aggelein (Duster)</li>
+        <li>Santigold</li>
+        <li>Scarlet House</li>
+        <li>The Black Angels</li>
+        <li>Arauchi Yu</li>
+        <li>Mirele</li>
+        <li>Chevelle</li>
+        <li>Dean Blunt</li>
+        <li>Chinese Cigarettes</li>
+        <li>Yung Lean</li>
+        <li>Mogwai</li>
+        <li>Whirr</li>
+        <li>Duster</li>
+        <li>sniper2004</li>
+        <li>Black Kray</li>
+        <li>Bar Italia</li>
+        <li>Eiafuawn</li>
+        <li>Julie</li>
+        <li><a href="https://www.last.fm/user/pimpledkey2200" class="button">go to my last.fm</a></li>
+    </ul>
+    
+    <p>Books:</p>
+    <ul>
+        <li>All Max Frisch books</li>
+        <li>Colm Toibin</li>
+        <li>Dispatches</li>
+        <li>/u/befriendjamin reddit comments</li>
+    </ul>
+    
+    <p>Mitch likes bar trivia</p>
+    
+{% with messages = get_flashed_messages() %}
+  {% if messages %}
+    <ul class="flashes">
+    {% for message in messages %}
+      <li>{{ message }}</li>
+    {% endfor %}
+    </ul>
+  {% endif %}
+{% endwith %}
+</body>
+</html>

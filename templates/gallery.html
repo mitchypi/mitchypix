@@ -5,6 +5,40 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Image Gallery</title>
     <style>
+        body {
+            font-size: 100%;
+            background-color: beige;
+            font-family: monospace;
+            text-align: center;
+        }
+        html {
+            -webkit-text-size-adjust: 100%;
+        }
+        table, td, tr{
+            border: 1px solid black;
+            border-collapse: collapse;
+            font-family: monospace;
+            text-align: center;
+        }
+        .wn{
+            text-align: left;
+        }
+        a { 
+            text-decoration: none;
+            text-align: center;
+        }
+        .button {
+            font-family: monospace;
+            padding: 8px 16px;
+            border: 1px solid black;
+            background-color: white;
+            cursor: pointer;
+            display: inline-block;
+            margin: 5px;
+        }
+        .button:hover {
+            background-color: #f0f0f0;
+        }
         .image-container {
             display: inline-block;
             margin: 10px;
@@ -21,19 +55,21 @@
         .pagination a, .pagination span {
             padding: 5px 10px;
             margin: 0 5px;
-            border: 1px solid #ddd;
+            border: 1px solid black;
             text-decoration: none;
+            background-color: white;
+            font-family: monospace;
         }
         .pagination .current {
-            background-color: #007bff;
-            color: white;
+            background-color: #ddd;
+            color: black;
         }
     </style>
 </head>
 <body>
     <h1>Image Gallery</h1>
     <p>Total Images: {{ total_images }}</p>
-    <p><a href="/">Back to Home</a></p>
+    <p><a href="/" class="button">Back to Home</a></p>
     {% if images %}
         {% for image_path, caption in images %}
         <div class="image-container">
@@ -44,26 +80,26 @@
         
         <div class="pagination">
             {% if page > 1 %}
-                <a href="{{ url_for('gallery', page=1) }}">First</a>
-                <a href="{{ url_for('gallery', page=page-1) }}">&laquo; Previous</a>
+                <a href="{{ url_for('gallery', page=1) }}" class="button">First</a>
+                <a href="{{ url_for('gallery', page=page-1) }}" class="button">&laquo; Previous</a>
             {% endif %}
             
             {% for p in page_range %}
                 {% if p == page %}
                     <span class="current">{{ p }}</span>
                 {% else %}
-                    <a href="{{ url_for('gallery', page=p) }}">{{ p }}</a>
+                    <a href="{{ url_for('gallery', page=p) }}" class="button">{{ p }}</a>
                 {% endif %}
             {% endfor %}
             
             {% if page < total_pages %}
-                <a href="{{ url_for('gallery', page=page+1) }}">Next &raquo;</a>
-                <a href="{{ url_for('gallery', page=total_pages) }}">Last</a>
+                <a href="{{ url_for('gallery', page=page+1) }}" class="button">Next &raquo;</a>
+                <a href="{{ url_for('gallery', page=total_pages) }}" class="button">Last</a>
             {% endif %}
         </div>
     {% else %}
         <p>No images uploaded yet.</p>
     {% endif %}
-    <p><a href="/">Back to Home</a></p>
+    <p><a href="/" class="button">Back to Home</a></p>
 </body>
 </html>

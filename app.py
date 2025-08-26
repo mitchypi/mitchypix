@@ -42,6 +42,14 @@ else:
 def home():
     return render_template('home.html')
 
+@app.route('/about')
+def about():
+    return render_template('about.html')
+
+@app.route('/08262025')
+def date_page():
+    return render_template('08262025.html')
+
 @app.route('/upload', methods=['POST'])
 def upload():
     global embeddings, image_paths, image_captions
