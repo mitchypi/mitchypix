@@ -50,6 +50,10 @@ def about():
 def date_page():
     return render_template('08262025.html')
 
+@app.route('/09112025')
+def date_page1():
+    return render_template('09112025.html')
+
 @app.route('/upload', methods=['POST'])
 def upload():
     global embeddings, image_paths, image_captions

@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About</title>
+    <style>
+        body {
+            font-size: 100%;
+            background-color: beige;
+            font-family: monospace;
+            /*font-family: 'Helvetica', 'Arial', sans-serif;*/
+            text-align: center;
+            /*text-align: center;*/
+        }
+        html {
+            -webkit-text-size-adjust: 100%; /* Prevent font scaling in landscape while allowing user zoom */
+        }
+        table, td, tr{
+            border: 1px solid black;
+            border-collapse: collapse;
+            font-family: monospace;
+            text-align: center;
+        }
+        /*p{
+            font-family: 'Helvetica', 'Arial', sans-serif;
+        }*/
+        .wn{
+            text-align: left;
+        }
+        a { 
+            text-decoration: none;
+            text-align: center;
+        }
+        .button {
+            font-family: monospace;
+            padding: 8px 16px;
+            border: 1px solid black;
+            background-color: white;
+            cursor: pointer;
+            display: inline-block;
+            margin: 5px;
+        }
+        .button:hover {
+            background-color: #f0f0f0;
+        }
+        ul {
+            display: inline-block;
+            text-align: left;
+            vertical-align: top;
+        }
+    </style>
+</head>
+<body>
+    <p>09/11/2025</p>
+    
+    <p><a href="/" class="button">Back to Home</a></p>
+
+    <p>Just did an at home sleep study so I'm going to get a CPAP. Check it out</p>
+    <img src="{{ url_for('static', filename='images/xD.jpg') }}" style="width: 25%;">
+
+    <p></p>
+    
+    
+{% with messages = get_flashed_messages() %}
+  {% if messages %}
+    <ul class="flashes">
+    {% for message in messages %}
+      <li>{{ message }}</li>
+    {% endfor %}
+    </ul>
+  {% endif %}
+{% endwith %}
+</body>
+</html>
