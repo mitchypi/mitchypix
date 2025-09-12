@@ -48,6 +48,28 @@
             max-width: 200px;
             word-wrap: break-word;
         }
+        .caption-input {
+            width: 200px;
+            padding: 5px;
+            font-family: monospace;
+            border: 1px solid black;
+            background-color: white;
+        }
+        .edit-mode {
+            display: none;
+        }
+        .save-all-button {
+            font-family: monospace;
+            padding: 10px 20px;
+            border: 2px solid black;
+            background-color: yellow;
+            cursor: pointer;
+            margin: 20px;
+            font-weight: bold;
+        }
+        .save-all-button:hover {
+            background-color: #ffff99;
+        }
         .pagination {
             margin-top: 20px;
             text-align: center;
@@ -70,11 +92,19 @@
     <h1>Image Gallery</h1>
     <p>Total Images: {{ total_images }}</p>
     <p><a href="/" class="button">Back to Home</a></p>
+    {% if request.environ.get('HTTP_HOST', '').startswith('127.0.0.1') or request.environ.get('HTTP_HOST', '').startswith('localhost') %}
+    <button class="save-all-button" onclick="saveAllCaptions()">Save All Caption Changes</button>
+    {% endif %}
     {% if images %}
         {% for image_path, caption in images %}
         <div class="image-container">
             <img src="{{ url_for('static', filename=image_path) }}" alt="Uploaded image" width="400">
+            {% if request.environ.get('HTTP_HOST', '').startswith('127.0.0.1') or request.environ.get('HTTP_HOST', '').startswith('localhost') %}
+            <p class="caption view-mode" onclick="editCaption('{{ image_path }}')">{{ caption }}</p>
+            <input type="text" class="caption-input edit-mode" value="{{ caption }}" data-image-path="{{ image_path }}" onblur="saveCaption('{{ image_path }}')" onkeypress="if(event.key==='Enter') this.blur()">
+            {% else %}
             <p class="caption">{{ caption }}</p>
+            {% endif %}
         </div>
         {% endfor %}
         
@@ -101,5 +131,60 @@
         <p>No images uploaded yet.</p>
     {% endif %}
     <p><a href="/" class="button">Back to Home</a></p>
+    
+    <script>
+        let captionChanges = {};
+        
+        function editCaption(imagePath) {
+            const container = event.target.parentElement;
+            const viewMode = container.querySelector('.view-mode');
+            const editMode = container.querySelector('.edit-mode');
+            
+            viewMode.style.display = 'none';
+            editMode.style.display = 'block';
+            editMode.focus();
+            editMode.select();
+        }
+        
+        function saveCaption(imagePath) {
+            const container = event.target.parentElement;
+            const viewMode = container.querySelector('.view-mode');
+            const editMode = container.querySelector('.edit-mode');
+            const newCaption = editMode.value;
+            
+            viewMode.textContent = newCaption;
+            viewMode.style.display = 'block';
+            editMode.style.display = 'none';
+            
+            captionChanges[imagePath] = newCaption;
+        }
+        
+        function saveAllCaptions() {
+            if (Object.keys(captionChanges).length === 0) {
+                alert('No caption changes to save');
+                return;
+            }
+            
+            fetch('/update_captions', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(captionChanges)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('All captions updated successfully!');
+                    captionChanges = {};
+                } else {
+                    alert('Error updating captions: ' + data.error);
+                }
+            })
+            .catch(error => {
+                alert('Error: ' + error);
+            });
+        }
+    </script>
 </body>
 </html>

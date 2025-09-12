@@ -1,5 +1,5 @@
 import os
-from flask import Flask, request, render_template, redirect, url_for
+from flask import Flask, request, render_template, redirect, url_for, jsonify
 import torch
 from transformers import CLIPProcessor, CLIPModel, BlipProcessor, BlipForConditionalGeneration
 from PIL import Image
@@ -167,6 +167,36 @@ def gallery():
                            total_pages=total_pages,
                            total_images=total_images,
                            page_range=page_range)
+
+@app.route('/update_captions', methods=['POST'])
+def update_captions():
+    # Only allow updates from localhost
+    if not (request.environ.get('HTTP_HOST', '').startswith('127.0.0.1') or 
+            request.environ.get('HTTP_HOST', '').startswith('localhost')):
+        return jsonify({'success': False, 'error': 'Access denied'}), 403
+    
+    try:
+        global image_captions, image_paths
+        
+        caption_updates = request.get_json()
+        
+        if not caption_updates:
+            return jsonify({'success': False, 'error': 'No caption data received'})
+        
+        # Update captions in the array
+        for image_path, new_caption in caption_updates.items():
+            # Find the index of the image path in the array
+            indices = np.where(image_paths == image_path)[0]
+            if len(indices) > 0:
+                image_captions[indices[0]] = new_caption
+        
+        # Save updated captions to file
+        np.save(CAPTIONS_FILE, image_captions)
+        
+        return jsonify({'success': True, 'message': f'Updated {len(caption_updates)} captions'})
+        
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
 
 def allowed_file(filename):
     ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
