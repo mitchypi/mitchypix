@@ -54,6 +54,10 @@ def date_page():
 def date_page1():
     return render_template('09112025.html')
 
+@app.route('/09292025')
+def date_page2():
+    return render_template('09292025.html')
+
 @app.route('/upload', methods=['POST'])
 def upload():
     global embeddings, image_paths, image_captions
