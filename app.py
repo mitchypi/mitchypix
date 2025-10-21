@@ -1,5 +1,9 @@
 import os
-from flask import Flask, request, render_template, redirect, url_for, jsonify
+import json
+import re
+from datetime import datetime
+from string import Template
+from flask import Flask, request, render_template, render_template_string, redirect, url_for, jsonify, flash, abort
 import torch
 from transformers import CLIPProcessor, CLIPModel, BlipProcessor, BlipForConditionalGeneration
 from PIL import Image
@@ -11,6 +15,253 @@ app = Flask(__name__)
 app.secret_key = 'hi'
 
 ITEMS_PER_PAGE = 50
+BLOG_POSTS_FILE = 'blog_posts.json'
+SLUG_PATTERN = re.compile(r'^[a-zA-Z0-9_-]+$')
+DEFAULT_BLOG_POSTS = [
+    {"slug": "09292025", "title": "09292025", "publish_date": "2025-09-29"},
+    {"slug": "09112025", "title": "09112025", "publish_date": "2025-09-11"},
+    {"slug": "08262025", "title": "08262025", "publish_date": "2025-08-26"},
+]
+ABOUT_CONTENT_FILE = 'about_content.json'
+DEFAULT_ABOUT_CONTENT = """<h1>About</h1>
+    
+    <p><a href="/" class="button">Back to Home</a></p>
+    
+    <p>Movies I like:</p>
+    <ul>
+        <li>Yi Yi</li>
+        <li>Robot Dreams</li>
+        <li>Nebraska</li>
+        <li>Blade Runner 2049</li>
+        <li>Donnie Darko</li>
+        <li>Everything Everywhere all at once</li>
+        <li>Apocalypse Now</li>
+        <li>Stalingrad</li>
+        <li>Leviathan</li>
+        <li>Full Metal Jacket</li>
+        <li>City of God</li>
+    </ul>
+    
+    <p>Games I like:</p>
+    <ul>
+        <li>Halo Reach</li>
+        <li>Life is Strange</li>
+        <li>Deus Ex</li>
+        <li>SOMA</li>
+        <li>jstris</li>
+        <li>Spec Ops the Line</li>
+        <li>Knights of the Old Republic</li>
+        <li>Fallout New Vegas</li>
+    </ul>
+    
+    <p>Music I like:</p>
+    <ul>
+        <li>Jadu Heart</li>
+        <li>Superheaven</li>
+        <li>Slow Pulp</li>
+        <li>Deftones</li>
+        <li>Brian Jonestown Massacre</li>
+        <li>Yung Hurn</li>
+        <li>Split Chain</li>
+        <li>Valium Aggelein (Duster)</li>
+        <li>Santigold</li>
+        <li>Scarlet House</li>
+        <li>The Black Angels</li>
+        <li>Arauchi Yu</li>
+        <li>Mirele</li>
+        <li>Chevelle</li>
+        <li>Dean Blunt</li>
+        <li>Chinese Cigarettes</li>
+        <li>Yung Lean</li>
+        <li>Mogwai</li>
+        <li>Whirr</li>
+        <li>Duster</li>
+        <li>sniper2004</li>
+        <li>Black Kray</li>
+        <li>Bar Italia</li>
+        <li>Eiafuawn</li>
+        <li>Julie</li>
+        <li>Bassvictim</li>
+        
+        <li><a href="https://www.last.fm/user/pimpledkey2200" class="button">go to my last.fm</a></li>
+    </ul>
+    
+    <p>Books:</p>
+    <ul>
+        <li>All Max Frisch books</li>
+        <li>Colm Toibin</li>
+        <li>Dispatches</li>
+        <li>/u/befriendjamin reddit comments</li>
+    </ul>
+    
+    <p>Mitch likes bar trivia</p>"""
+BLOG_HTML_TEMPLATE = Template("""<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>$title</title>
+    <style>
+        body {
+            font-size: 100%;
+            background-color: beige;
+            font-family: monospace;
+            text-align: center;
+        }
+        html {
+            -webkit-text-size-adjust: 100%;
+        }
+        table, td, tr{
+            border: 1px solid black;
+            border-collapse: collapse;
+            font-family: monospace;
+            text-align: center;
+        }
+        .wn{
+            text-align: left;
+        }
+        a { 
+            text-decoration: none;
+            text-align: center;
+        }
+        .button {
+            font-family: monospace;
+            padding: 8px 16px;
+            border: 1px solid black;
+            background-color: white;
+            cursor: pointer;
+            display: inline-block;
+            margin: 5px;
+        }
+        .button:hover {
+            background-color: #f0f0f0;
+        }
+        ul {
+            display: inline-block;
+            text-align: left;
+            vertical-align: top;
+        }
+    </style>
+</head>
+<body>
+    <p>$display_date</p>
+    
+    <p><a href="/" class="button">Back to Home</a></p>
+
+    $content_html
+    
+{% with messages = get_flashed_messages() %}
+  {% if messages %}
+    <ul class="flashes">
+    {% for message in messages %}
+      <li>{{ message }}</li>
+    {% endfor %}
+    </ul>
+  {% endif %}
+{% endwith %}
+</body>
+</html>
+""")
+
+
+def ensure_blog_posts_file():
+    if not os.path.exists(BLOG_POSTS_FILE):
+        save_blog_posts(DEFAULT_BLOG_POSTS)
+
+
+def ensure_about_content_file():
+    if not os.path.exists(ABOUT_CONTENT_FILE):
+        save_about_content(DEFAULT_ABOUT_CONTENT)
+
+
+def load_blog_posts():
+    ensure_blog_posts_file()
+    try:
+        with open(BLOG_POSTS_FILE, 'r', encoding='utf-8') as handle:
+            posts = json.load(handle)
+            return posts if isinstance(posts, list) else []
+    except (json.JSONDecodeError, OSError):
+        return []
+
+
+def save_blog_posts(posts):
+    with open(BLOG_POSTS_FILE, 'w', encoding='utf-8') as handle:
+        json.dump(posts, handle, indent=2)
+
+
+def load_about_content():
+    ensure_about_content_file()
+    try:
+        with open(ABOUT_CONTENT_FILE, 'r', encoding='utf-8') as handle:
+            payload = json.load(handle)
+            if isinstance(payload, dict):
+                content = payload.get('content')
+                if isinstance(content, str):
+                    return content
+    except (json.JSONDecodeError, OSError):
+        pass
+    return DEFAULT_ABOUT_CONTENT
+
+
+def save_about_content(content):
+    with open(ABOUT_CONTENT_FILE, 'w', encoding='utf-8') as handle:
+        json.dump({"content": content}, handle, indent=2)
+
+
+def sort_blog_posts(posts):
+    return sorted(
+        posts,
+        key=lambda post: post.get('publish_date', ''),
+        reverse=True,
+    )
+
+
+def normalize_publish_date(slug, publish_date):
+    if publish_date:
+        try:
+            dt = datetime.strptime(publish_date, "%Y-%m-%d")
+            return dt.strftime("%Y-%m-%d")
+        except ValueError:
+            return None
+    if len(slug) == 8 and slug.isdigit():
+        try:
+            dt = datetime.strptime(slug, "%m%d%Y")
+            return dt.strftime("%Y-%m-%d")
+        except ValueError:
+            return None
+    return None
+
+
+def format_display_date(publish_date, fallback):
+    if publish_date:
+        try:
+            dt = datetime.strptime(publish_date, "%Y-%m-%d")
+            return dt.strftime("%m/%d/%Y")
+        except ValueError:
+            pass
+    if len(fallback) == 8 and fallback.isdigit():
+        return f"{fallback[:2]}/{fallback[2:4]}/{fallback[4:]}"
+    return fallback
+
+
+def convert_content_to_html(raw_content):
+    paragraphs = [line.strip() for line in raw_content.splitlines() if line.strip()]
+    if not paragraphs:
+        return "<p></p>"
+    return "\n    ".join(f"<p>{paragraph}</p>" for paragraph in paragraphs)
+
+
+def is_local_request():
+    host = request.environ.get('HTTP_HOST', '') or ''
+    remote_addr = (request.remote_addr or '').strip()
+    forwarded_for_hdr = request.headers.get('X-Forwarded-For', '').strip()
+    forwarded_for = forwarded_for_hdr.split(',')[0].strip() if forwarded_for_hdr else ''
+    local_hosts = ('127.0.0.1', 'localhost', '0.0.0.0')
+    return (
+        any(host.startswith(h) for h in local_hosts)
+        or remote_addr in ('127.0.0.1', '::1')
+        or forwarded_for in ('127.0.0.1', '::1')
+    )
 # Check for GPU
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(f"Using device: {device}")
@@ -40,23 +291,194 @@ else:
 
 @app.route('/')
 def home():
-    return render_template('home.html')
+    blog_posts = sort_blog_posts(load_blog_posts())
+    about_content = load_about_content()
+    return render_template('home.html', blog_posts=blog_posts, about_content_raw=about_content)
 
 @app.route('/about')
 def about():
-    return render_template('about.html')
+    about_content = load_about_content()
+    return render_template('about.html', about_content=about_content)
 
-@app.route('/08262025')
-def date_page():
-    return render_template('08262025.html')
 
-@app.route('/09112025')
-def date_page1():
-    return render_template('09112025.html')
+@app.route('/about/edit')
+def edit_about():
+    if not is_local_request():
+        flash('About editing is only available from localhost.')
+        return redirect(url_for('about'))
+    content = load_about_content()
+    return render_template('about_edit.html', content=content)
 
-@app.route('/09292025')
-def date_page2():
-    return render_template('09292025.html')
+@app.route('/blog/<slug>')
+def serve_blog_post(slug):
+    blog_posts = load_blog_posts()
+    valid_slugs = {post['slug'] for post in blog_posts}
+    if slug not in valid_slugs:
+        abort(404)
+    template_name = f'{slug}.html'
+    template_path = os.path.join(
+        app.root_path,
+        app.template_folder or 'templates',
+        template_name,
+    )
+    if not os.path.exists(template_path):
+        abort(404)
+    # Inject a small edit link when local so user can edit the post
+    if is_local_request():
+        try:
+            with open(template_path, 'r', encoding='utf-8') as fh:
+                html = fh.read()
+            edit_url = url_for('edit_blog_post', slug=slug)
+            injection = f"\n<div style=\"position:fixed;bottom:10px;right:10px;z-index:9999;\">\n  <a href=\"{edit_url}\" class=\"button\">Edit This Post</a>\n</div>\n"
+            if '</body>' in html:
+                html = html.replace('</body>', injection + '</body>')
+            else:
+                html = html + injection
+            return render_template_string(html)
+        except Exception:
+            # Fallback to normal rendering if injection fails
+            return render_template(template_name)
+    return render_template(template_name)
+
+
+@app.route('/blog/<slug>/edit')
+def edit_blog_post(slug):
+    if not is_local_request():
+        flash('Blog editing is only available from localhost.')
+        return redirect(url_for('serve_blog_post', slug=slug))
+
+    blog_posts = load_blog_posts()
+    valid_slugs = {post['slug'] for post in blog_posts}
+    if slug not in valid_slugs:
+        abort(404)
+    template_name = f'{slug}.html'
+    template_path = os.path.join(
+        app.root_path,
+        app.template_folder or 'templates',
+        template_name,
+    )
+    if not os.path.exists(template_path):
+        abort(404)
+
+    with open(template_path, 'r', encoding='utf-8') as fh:
+        content = fh.read()
+    return render_template('blog_edit.html', slug=slug, content=content)
+
+
+@app.route('/blog/<slug>/update', methods=['POST'])
+def update_blog_post(slug):
+    if not is_local_request():
+        flash('Blog editing is only available from localhost.')
+        return redirect(url_for('serve_blog_post', slug=slug))
+
+    blog_posts = load_blog_posts()
+    valid_slugs = {post['slug'] for post in blog_posts}
+    if slug not in valid_slugs:
+        abort(404)
+    template_name = f'{slug}.html'
+    template_path = os.path.join(
+        app.root_path,
+        app.template_folder or 'templates',
+        template_name,
+    )
+    if not os.path.exists(template_path):
+        abort(404)
+
+    new_content = request.form.get('content', '')
+    if not new_content.strip():
+        flash('Content cannot be empty.')
+        return redirect(url_for('edit_blog_post', slug=slug))
+    try:
+        with open(template_path, 'w', encoding='utf-8') as fh:
+            fh.write(new_content)
+        flash('Blog post updated.')
+    except OSError as exc:
+        flash(f'Failed to update blog post: {exc}')
+        return redirect(url_for('edit_blog_post', slug=slug))
+    return redirect(url_for('serve_blog_post', slug=slug))
+
+
+@app.route('/blog/create', methods=['POST'])
+def create_blog_post():
+    if not is_local_request():
+        flash('Blog post creation is only available from localhost.')
+        return redirect(url_for('home'))
+
+    slug = request.form.get('slug', '').strip()
+    title = request.form.get('title', '').strip()
+    publish_date = request.form.get('publish_date', '').strip()
+    raw_content = request.form.get('content', '').strip()
+
+    if not slug:
+        flash('Slug is required.')
+        return redirect(url_for('home'))
+    if not SLUG_PATTERN.match(slug):
+        flash('Slug may only contain letters, numbers, hyphens, and underscores.')
+        return redirect(url_for('home'))
+
+    blog_posts = load_blog_posts()
+    if any(post['slug'] == slug for post in blog_posts):
+        flash(f'A blog post with slug "{slug}" already exists.')
+        return redirect(url_for('home'))
+
+    normalized_date = normalize_publish_date(slug, publish_date)
+    if publish_date and not normalized_date:
+        flash('Publish date must be in YYYY-MM-DD format.')
+        return redirect(url_for('home'))
+
+    display_date = format_display_date(normalized_date, slug)
+    title = title or slug
+    content_html = convert_content_to_html(raw_content)
+
+    template_name = f'{slug}.html'
+    template_path = os.path.join(
+        app.root_path,
+        app.template_folder or 'templates',
+        template_name,
+    )
+    if os.path.exists(template_path):
+        flash(f'Template for "{slug}" already exists.')
+        return redirect(url_for('home'))
+
+    try:
+        rendered = BLOG_HTML_TEMPLATE.substitute(
+            title=title,
+            display_date=display_date,
+            content_html=content_html,
+        )
+        with open(template_path, 'w', encoding='utf-8') as handle:
+            handle.write(rendered)
+    except OSError as exc:
+        flash(f'Failed to write blog post: {exc}')
+        return redirect(url_for('home'))
+
+    blog_posts.append(
+        {
+            "slug": slug,
+            "title": title,
+            "publish_date": normalized_date or "",
+        }
+    )
+    save_blog_posts(sort_blog_posts(blog_posts))
+    flash(f'Created blog post "{title}".')
+    return redirect(url_for('serve_blog_post', slug=slug))
+
+
+@app.route('/about/update', methods=['POST'])
+def update_about():
+    if not is_local_request():
+        flash('About page updates are only available from localhost.')
+        return redirect(url_for('home'))
+
+    content = request.form.get('content', '').strip()
+    if not content:
+        flash('Content is required to update the About page.')
+        return redirect(url_for('home'))
+
+    save_about_content(content)
+    flash('Updated About page.')
+    return redirect(url_for('about'))
+
 
 @app.route('/upload', methods=['POST'])
 def upload():

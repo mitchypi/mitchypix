@@ -48,14 +48,33 @@
     <h1 style="color: rgb(26, 253, 215);"><i>Welcome to my website</i></h1>
     <p>Digicam pics + semantic search with CLIP (the images are stored as vectors and your query is turned into a vector to find semantically similar images to your query). All captions made by yours truly</p>
     
-    {% if request.environ.get('HTTP_HOST', '').startswith('127.0.0.1') or request.environ.get('HTTP_HOST', '').startswith('localhost') %}
+    {% if request.environ.get('HTTP_HOST', '').startswith('127.0.0.1') or request.environ.get('HTTP_HOST', '').startswith('localhost') or request.environ.get('HTTP_HOST', '').startswith('0.0.0.0') %}
     <h2>Upload Images</h2>
     <form action="/upload" method="post" enctype="multipart/form-data">
         <input type="file" name="files" accept="image/*" multiple>
         <input type="submit" value="Upload">
     </form>
+    <h2>Create Blog Post</h2>
+    <form action="{{ url_for('create_blog_post') }}" method="post">
+        <input type="text" name="slug" placeholder="Slug (e.g. 10012025)" required>
+        <input type="text" name="title" placeholder="Title (optional)">
+        <input type="text" name="publish_date" placeholder="Publish date YYYY-MM-DD (optional)">
+        <br>
+        <textarea name="content" rows="6" cols="60" placeholder="Post content (one paragraph per line)"></textarea>
+        <br>
+        <input type="submit" value="Create Blog Post" class="button">
+    </form>
+    <!-- About editing moved to About page editor -->
     {% endif %}
-    
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <ul class="flashes">
+        {% for message in messages %}
+          <li>{{ message }}</li>
+        {% endfor %}
+        </ul>
+      {% endif %}
+    {% endwith %}
     
     <h2>Search Images</h2>
     <form action="/search" method="post">
@@ -66,7 +85,17 @@
     
     
     <p><a href="/about" class="button">About</a> <a href="/gallery" class="button">View Image Gallery</a></p>
-    <p><a href="/09292025" class="button">09292025</a> <a href="/09112025" class="button">09112025</a> <a href="/08262025" class="button">08262025</a></p>
+    
+    <h2>Blog Posts</h2>
+    {% if blog_posts %}
+    <p>
+        {% for post in blog_posts %}
+        <a href="{{ url_for('serve_blog_post', slug=post.slug) }}" class="button">{{ post.title }}</a>
+        {% endfor %}
+    </p>
+    {% else %}
+    <p>No blog posts yet.</p>
+    {% endif %}
     <img src="{{ url_for('static', filename='images/img1.png') }}">
 </body>
 {% with messages = get_flashed_messages() %}

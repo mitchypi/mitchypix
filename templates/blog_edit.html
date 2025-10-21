@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Edit {{ slug }}</title>
+  <style>
+    body { font-size: 100%; background-color: beige; font-family: monospace; text-align: center; }
+    .button { font-family: monospace; padding: 8px 16px; border: 1px solid black; background-color: white; cursor: pointer; display: inline-block; margin: 5px; }
+    .button:hover { background-color: #f0f0f0; }
+    textarea { width: 95%; max-width: 1200px; height: 70vh; }
+    .wrap { max-width: 1280px; margin: 0 auto; }
+  </style>
+  <script>
+    // Tab -> 4 spaces in textarea
+    document.addEventListener('DOMContentLoaded', function() {
+      var ta = document.getElementById('editor');
+      if (!ta) return;
+      ta.addEventListener('keydown', function(e){
+        if (e.key === 'Tab') {
+          e.preventDefault();
+          var start = this.selectionStart;
+          var end = this.selectionEnd;
+          var indent = '    ';
+          var before = this.value.substring(0, start);
+          var after = this.value.substring(end);
+          this.value = before + indent + after;
+          this.selectionStart = this.selectionEnd = start + indent.length;
+        }
+      });
+    });
+  </script>
+  <meta name="robots" content="noindex,nofollow">
+  <meta http-equiv="Cache-Control" content="no-store" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+</head>
+<body>
+  <div class="wrap">
+    <h2>Edit Post: {{ slug }}</h2>
+    <p>
+      <a class="button" href="{{ url_for('serve_blog_post', slug=slug) }}">Back to Post</a>
+      <a class="button" href="/">Home</a>
+    </p>
+    <form action="{{ url_for('update_blog_post', slug=slug) }}" method="post">
+      <textarea id="editor" name="content">{{ content }}</textarea>
+      <br>
+      <input type="submit" class="button" value="Save">
+    </form>
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <ul class="flashes">
+        {% for message in messages %}
+          <li>{{ message }}</li>
+        {% endfor %}
+        </ul>
+      {% endif %}
+    {% endwith %}
+  </div>
+</body>
+</html>
