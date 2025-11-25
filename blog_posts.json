@@ -1,5 +1,10 @@
 [
   {
+    "slug": "games",
+    "title": "Some new games",
+    "publish_date": "2025-11-24"
+  },
+  {
     "slug": "roadtrip",
     "title": "Where I went on my road trip",
     "publish_date": "2025-10-21"
