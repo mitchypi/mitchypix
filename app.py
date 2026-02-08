@@ -329,7 +329,15 @@ def serve_blog_post(slug):
             with open(template_path, 'r', encoding='utf-8') as fh:
                 html = fh.read()
             edit_url = url_for('edit_blog_post', slug=slug)
-            injection = f"\n<div style=\"position:fixed;bottom:10px;right:10px;z-index:9999;\">\n  <a href=\"{edit_url}\" class=\"button\">Edit This Post</a>\n</div>\n"
+            delete_url = url_for('delete_blog_post', slug=slug)
+            injection = (
+                "\n<div style=\"position:fixed;bottom:10px;right:10px;z-index:9999;display:flex;gap:8px;align-items:center;\">"
+                f"\n  <a href=\"{edit_url}\" class=\"button\">Edit This Post</a>"
+                f"\n  <form action=\"{delete_url}\" method=\"post\" style=\"margin:0;\" onsubmit=\"return confirm('Delete this blog post? This cannot be undone.');\">"
+                "\n    <button type=\"submit\" class=\"button\">Delete This Post</button>"
+                "\n  </form>"
+                "\n</div>\n"
+            )
             if '</body>' in html:
                 html = html.replace('</body>', injection + '</body>')
             else:
@@ -396,6 +404,35 @@ def update_blog_post(slug):
         flash(f'Failed to update blog post: {exc}')
         return redirect(url_for('edit_blog_post', slug=slug))
     return redirect(url_for('serve_blog_post', slug=slug))
+
+
+@app.route('/blog/<slug>/delete', methods=['POST'])
+def delete_blog_post(slug):
+    if not is_local_request():
+        flash('Blog deletion is only available from localhost.')
+        return redirect(url_for('serve_blog_post', slug=slug))
+
+    blog_posts = load_blog_posts()
+    updated_posts = [post for post in blog_posts if post.get('slug') != slug]
+    if len(updated_posts) == len(blog_posts):
+        abort(404)
+
+    template_name = f'{slug}.html'
+    template_path = os.path.join(
+        app.root_path,
+        app.template_folder or 'templates',
+        template_name,
+    )
+
+    try:
+        if os.path.exists(template_path):
+            os.remove(template_path)
+        save_blog_posts(sort_blog_posts(updated_posts))
+        flash(f'Deleted blog post "{slug}".')
+    except OSError as exc:
+        flash(f'Failed to delete blog post: {exc}')
+        return redirect(url_for('serve_blog_post', slug=slug))
+    return redirect(url_for('home'))
 
 
 @app.route('/blog/create', methods=['POST'])

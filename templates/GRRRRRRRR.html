@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GRRRRR</title>
+    <style>
+        body {
+            font-size: 100%;
+            background-color: beige;
+            font-family: monospace;
+            text-align: center;
+        }
+        html {
+            -webkit-text-size-adjust: 100%;
+        }
+        table, td, tr{
+            border: 1px solid black;
+            border-collapse: collapse;
+            font-family: monospace;
+            text-align: center;
+        }
+        .wn{
+            text-align: left;
+        }
+        a { 
+            text-decoration: none;
+            text-align: center;
+        }
+        .button {
+            font-family: monospace;
+            padding: 8px 16px;
+            border: 1px solid black;
+            background-color: white;
+            cursor: pointer;
+            display: inline-block;
+            margin: 5px;
+        }
+        .button:hover {
+            background-color: #f0f0f0;
+        }
+        ul {
+            display: inline-block;
+            text-align: left;
+            vertical-align: top;
+        }
+    </style>
+</head>
+<body>
+    <p>02/08/2026</p>
+    
+    <p><a href="/" class="button">Back to Home</a></p>
+
+    <p>GRRRRRR me grug</p>
+    
+{% with messages = get_flashed_messages() %}
+  {% if messages %}
+    <ul class="flashes">
+    {% for message in messages %}
+      <li>{{ message }}</li>
+    {% endfor %}
+    </ul>
+  {% endif %}
+{% endwith %}
+</body>
+</html>
