@@ -396,9 +396,10 @@ def update_blog_post(slug):
     if not new_content.strip():
         flash('Content cannot be empty.')
         return redirect(url_for('edit_blog_post', slug=slug))
+    normalized_content = new_content.replace('\r\n', '\n').replace('\r', '\n')
     try:
-        with open(template_path, 'w', encoding='utf-8') as fh:
-            fh.write(new_content)
+        with open(template_path, 'w', encoding='utf-8', newline='\n') as fh:
+            fh.write(normalized_content)
         flash('Blog post updated.')
     except OSError as exc:
         flash(f'Failed to update blog post: {exc}')
@@ -483,7 +484,7 @@ def create_blog_post():
             display_date=display_date,
             content_html=content_html,
         )
-        with open(template_path, 'w', encoding='utf-8') as handle:
+        with open(template_path, 'w', encoding='utf-8', newline='\n') as handle:
             handle.write(rendered)
     except OSError as exc:
         flash(f'Failed to write blog post: {exc}')

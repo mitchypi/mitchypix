@@ -1,0 +1,348 @@
+﻿<!DOCTYPE html>
+
+
+
+<html lang="en">
+
+
+
+<head>
+
+
+
+    <meta charset="UTF-8">
+
+
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
+
+    <title>Some pictures I think are cool</title>
+
+
+
+    <style>
+
+
+
+        body {
+
+
+
+            font-size: 100%;
+
+
+
+            background-color: beige;
+
+
+
+            font-family: monospace;
+
+
+
+            text-align: center;
+
+
+
+        }
+
+
+
+        html {
+
+
+
+            -webkit-text-size-adjust: 100%;
+
+
+
+        }
+
+
+
+        table, td, tr{
+
+
+
+            border: 1px solid black;
+
+
+
+            border-collapse: collapse;
+
+
+
+            font-family: monospace;
+
+
+
+            text-align: center;
+
+
+
+        }
+
+
+
+        .wn{
+
+
+
+            text-align: left;
+
+
+
+        }
+
+
+
+        a {
+
+
+
+            text-decoration: none;
+
+
+
+            text-align: center;
+
+
+
+        }
+
+
+
+        .button {
+
+
+
+            font-family: monospace;
+
+
+
+            padding: 8px 16px;
+
+
+
+            border: 1px solid black;
+
+
+
+            background-color: white;
+
+
+
+            cursor: pointer;
+
+
+
+            display: inline-block;
+
+
+
+            margin: 5px;
+
+
+
+        }
+
+
+
+        .button:hover {
+
+
+
+            background-color: #f0f0f0;
+
+
+
+        }
+
+
+
+        ul {
+
+
+
+            display: inline-block;
+
+
+
+            text-align: left;
+
+
+
+            vertical-align: top;
+
+
+
+        }
+
+
+
+    </style>
+
+
+
+</head>
+
+
+
+<body>
+
+
+
+    <p>02/11/2026</p>
+
+
+
+    <p><a href="/" class="button">Back to Home</a></p>
+
+
+
+
+
+
+
+    <div>
+
+
+
+        <p><img src="{{ url_for('static', filename='images/cool1.jpg') }}" alt="cool1" style="width: min(90vw, 700px); height: auto;"></p>
+
+
+
+        <p>From the internal troops wikipedia page</p>
+
+
+
+        <p><img src="{{ url_for('static', filename='images/cool2.jpg') }}" alt="cool2" style="width: min(90vw, 700px); height: auto;"></p>
+
+
+
+        <p>From the Operational Hannibal wikipedia page</p>
+
+
+
+        <p><img src="{{ url_for('static', filename='images/cool3.jpg') }}" alt="cool3" style="width: min(90vw, 700px); height: auto;"></p>
+
+
+
+        <p>A quite relatable picture</p>
+
+
+
+        <p><img src="{{ url_for('static', filename='images/cool4.jpg') }}" alt="cool4" style="width: min(90vw, 700px); height: auto;"></p>
+
+
+
+        <p>From the book "Balkenkreuz über Wüstensand."</p>
+
+
+
+        <p><img src="{{ url_for('static', filename='images/cool5.jpg') }}" alt="cool5" style="width: min(90vw, 700px); height: auto;"></p>
+
+
+
+        <p>From the book "Balkenkreuz über Wüstensand."</p>
+
+
+
+        <p><img src="{{ url_for('static', filename='images/cool6.jpg') }}" alt="cool6" style="width: min(90vw, 700px); height: auto;"></p>
+
+
+
+        <p>From the book "Balkenkreuz über Wüstensand."</p>
+
+
+
+        <p><img src="{{ url_for('static', filename='images/cool7.jpg') }}" alt="cool7" style="width: min(90vw, 700px); height: auto;"></p>
+
+        <p>People with schizoid personality disorder often prefer solitary activities.</p>
+
+
+
+        <p><img src="{{ url_for('static', filename='images/cool8.png') }}" alt="cool8" style="width: min(90vw, 700px); height: auto;"></p>
+
+
+
+        <p><img src="{{ url_for('static', filename='images/cool9.png') }}" alt="cool9" style="width: min(90vw, 700px); height: auto;"></p>
+
+
+
+        <p><img src="{{ url_for('static', filename='images/cool10.png') }}" alt="cool10" style="width: min(90vw, 700px); height: auto;"></p>
+
+        <p>Wall of faces</p>
+
+
+
+        <p><img src="{{ url_for('static', filename='images/cool11.webp') }}" alt="cool11" style="width: min(90vw, 700px); height: auto;"></p>
+
+        <p>Photo album compiled by a Black soldier serving in the Vietnam War</p>
+
+        <p><img src="{{ url_for('static', filename='images/cool12.webp') }}" alt="cool12" style="width: min(90vw, 700px); height: auto;"></p>
+
+
+
+        <p><img src="{{ url_for('static', filename='images/cool13.webp') }}" alt="cool13" style="width: min(90vw, 700px); height: auto;"></p>
+
+
+
+        <p><img src="{{ url_for('static', filename='images/cool14.webp') }}" alt="cool14" style="width: min(90vw, 700px); height: auto;"></p>
+
+
+
+    </div>
+
+
+
+
+
+
+
+{% with messages = get_flashed_messages() %}
+
+
+
+  {% if messages %}
+
+
+
+    <ul class="flashes">
+
+
+
+    {% for message in messages %}
+
+
+
+      <li>{{ message }}</li>
+
+
+
+    {% endfor %}
+
+
+
+    </ul>
+
+
+
+  {% endif %}
+
+
+
+{% endwith %}
+
+
+
+</body>
+
+
+
+</html>
+
+
+
